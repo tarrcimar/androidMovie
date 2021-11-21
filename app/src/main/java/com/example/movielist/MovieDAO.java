@@ -12,6 +12,9 @@ public interface MovieDAO {
     @Insert
     void insertMovie(Movie movie);
 
+    @Query("DELETE FROM movie_table")
+    void nuke();
+
     @Query("SELECT * FROM movie_table")
     List<Movie> getAll();
 

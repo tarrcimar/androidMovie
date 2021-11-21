@@ -41,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
                         Intent intent = new Intent(MainActivity.this, MovieDetailsActivity.class);
                         intent.putExtra("title", items[i]);
                         startActivityForResult(intent, 1);
+                        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
                     }
                 });
             });
@@ -63,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, PopActivity.class);
                 //startActivity(new Intent(MainActivity.this, PopActivity.class));
                 startActivityForResult(intent, 1);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             }
         });
     }
