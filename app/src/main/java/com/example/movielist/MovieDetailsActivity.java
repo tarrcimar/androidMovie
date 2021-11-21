@@ -3,6 +3,7 @@ package com.example.movielist;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -26,6 +27,12 @@ public class MovieDetailsActivity extends Activity {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    private String date;
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     private ImageView imageView;
@@ -57,10 +64,20 @@ public class MovieDetailsActivity extends Activity {
                 titleTextView.setTypeface(null, Typeface.BOLD);
                 titleTextView.setText(movie.getTitle());
                 dateTextView.setText(Integer.toString(movie.getReleaseDate()));
+                setDate(Integer.toString(movie.getReleaseDate()));
                 descriptionTextView.setMovementMethod(new ScrollingMovementMethod());
                 descriptionTextView.setText(movie.getDescription());
             });
         }).start();
+
+        imageView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + title + "+" + date));
+                startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+        });
 
     }
 }
