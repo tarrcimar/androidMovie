@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">MovieList</string>
+    <string name="search">Search</string>
+    <string name="search_for_a_title">Search for a title</string>
+    <string name="dateTextView">TextView</string>
+    <string name="titleTextView">TextView</string>
+    <string name="descriptionTextView">TextView</string>
+    <string name="todo">TODO</string>
+</resources>
