@@ -14,7 +14,7 @@ import android.widget.Toast;
 
 import com.example.movielist.databinding.ActivityMainBinding;
 
-public class AnotherMainActivity extends Activity {
+public class AnotherMainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     String[] items = new String[]{"1", "2", "3", "4"};
@@ -66,6 +66,21 @@ public class AnotherMainActivity extends Activity {
                 //startActivity(new Intent(MainActivity.this, PopActivity.class));
                 startActivityForResult(intent, 1);
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            }
+        });
+
+        binding.nuke.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new Thread(()-> {
+                    MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
+                            MovieDatabase.class, "movie-db").allowMainThreadQueries().build();
+                    db.movieDAO().nuke();
+                    Intent refresh = new Intent(AnotherMainActivity.this, AnotherMainActivity.class);
+                    startActivity(refresh);
+                    overridePendingTransition(android.R.anim.accelerate_interpolator, android.R.anim.decelerate_interpolator);
+                    AnotherMainActivity.this.finish();
+                }).start();
             }
         });
     }

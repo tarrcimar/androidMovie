@@ -12,6 +12,9 @@ public interface MovieDAO {
     @Insert
     void insertMovie(Movie movie);
 
+    @Query("DELETE FROM movie_table WHERE title = :title")
+    void deleteByTitle(String title);
+
     @Query("DELETE FROM movie_table")
     void nuke();
 

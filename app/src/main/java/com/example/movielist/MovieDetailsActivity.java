@@ -15,13 +15,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
 import com.bumptech.glide.Glide;
 
 import org.w3c.dom.Text;
 
-public class MovieDetailsActivity extends Activity {
+public class MovieDetailsActivity extends AppCompatActivity {
 
     private String title;
 
@@ -39,6 +40,7 @@ public class MovieDetailsActivity extends Activity {
     private TextView titleTextView;
     private TextView dateTextView;
     private TextView descriptionTextView;
+    private ImageView delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +54,7 @@ public class MovieDetailsActivity extends Activity {
         titleTextView = findViewById(R.id.titleTextView);
         dateTextView = findViewById(R.id.dateTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
+        delete = findViewById(R.id.delete);
 
         new Thread(()-> {
             MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
@@ -70,14 +73,22 @@ public class MovieDetailsActivity extends Activity {
             });
         }).start();
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + title + "+" + date));
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-            }
+        imageView.setOnClickListener(view -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/search?q=" + title + "+" + date));
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
+
+        delete.setOnClickListener(view -> new Thread(()-> {
+            MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
+                    MovieDatabase.class, "movie-db").allowMainThreadQueries().build();
+
+            Intent refresh = new Intent(MovieDetailsActivity.this, AnotherMainActivity.class);
+            startActivity(refresh);
+            overridePendingTransition(android.R.anim.accelerate_interpolator, android.R.anim.decelerate_interpolator);
+            MovieDetailsActivity.this.finish();
+            db.movieDAO().deleteByTitle(title);
+        }).start());
 
     }
 }
