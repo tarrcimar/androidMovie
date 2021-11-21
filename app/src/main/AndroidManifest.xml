@@ -16,15 +16,17 @@
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"></action>
+                <category android:name="android.intent.category.LAUNCHER"></category>
             </intent-filter>
         </activity>
         <activity android:name=".PopActivity"
+            android:exported="true"
             android:theme="@style/Theme.CustomTheme"
             ></activity>
         <activity android:name=".MovieDetailsActivity"></activity>
+        <activity android:name=".AnotherMainActivity">
+        </activity>
     </application>
 
 </manifest>
