@@ -45,6 +45,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getSupportActionBar().hide();
 
         setContentView(R.layout.movie_detail);
         Bundle extras = getIntent().getExtras();

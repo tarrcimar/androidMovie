@@ -1,5 +1,6 @@
 package com.example.movielist;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.Query;
@@ -21,10 +22,13 @@ public interface MovieDAO {
     @Query("SELECT * FROM movie_table")
     List<Movie> getAll();
 
-    @Query("SELECT title FROM movie_table")
-    List<String> getAllTitles();
+    @Query("SELECT * FROM movie_table")
+    LiveData<List<Movie>> getAllTitles();
 
     @Query("SELECT * FROM movie_table WHERE title = :title")
     Movie findByTitle(String title);
+
+    @Query("UPDATE movie_table SET isWatched = :state WHERE title = :title")
+    void setWatched(boolean state, String title);
 
 }

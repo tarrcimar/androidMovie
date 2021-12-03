@@ -84,13 +84,10 @@ public class PopActivity extends Activity {
                                 JSONObject jsonObject = jsonArray.getJSONObject(i);
                                 Log.d("ORIGINAL", jsonObject.getString("original_title") + ": " + editText.getText());
                                 if(jsonObject.getString("original_title").equals(editText.getText().toString())){
-                                    Log.d("FASZ", jsonObject.toString());
                                     title = jsonObject.getString("original_title");
                                     releaseDate = Integer.parseInt(jsonObject.getString("release_date").split("-")[0]);
                                     description = jsonObject.getString("overview");
                                     imagePath = jsonObject.getString("poster_path");
-                                    Log.d("IMAGE", imagePath);
-
 
                                     new Thread(()-> {
                                         MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
@@ -116,12 +113,7 @@ public class PopActivity extends Activity {
                             textView.setText("Movie not found!");
                         }
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        error.printStackTrace();
-                    }
-                });
+                }, error -> error.printStackTrace());
 
                 requestQueue.add(jsonObjectRequest);
             }

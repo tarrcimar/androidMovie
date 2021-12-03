@@ -32,6 +32,9 @@ public class Movie {
     @ColumnInfo(name = "path")
     private String image_path;
 
+    @ColumnInfo(name = "isWatched")
+    private boolean isWatched;
+
     public int getId() {
         return id;
     }
@@ -70,6 +73,14 @@ public class Movie {
 
     public void setImage_path(String image_path) {
         this.image_path = image_path;
+    }
+
+    public boolean isWatched() {
+        return isWatched;
+    }
+
+    public void setWatched(boolean watched) {
+        isWatched = watched;
     }
 
 
