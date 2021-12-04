@@ -22,9 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".PopActivity"
-            android:theme="@style/Theme.CustomTheme"
-            ></activity>
         <activity android:name=".MovieDetailsActivity"></activity>
         <activity android:name=".AnotherMainActivity">
         </activity>

@@ -106,10 +106,6 @@ public class MainActivity extends AppCompatActivity {
                 .setNegativeButtonText("Use account password")
                 .build();
 
-        // Prompt appears when user clicks "Log in".
-        // Consider integrating with the keystore to unlock cryptographic operations,
-        // if needed by your app.
-
         fingerPrint.setOnClickListener(view -> {
             biometricPrompt.authenticate(promptInfo);
         });
