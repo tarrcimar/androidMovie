@@ -1,6 +1,8 @@
-package com.example.movielist;
+package com.example.movielist.database;
 
+import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
+import androidx.room.Delete;
 import androidx.room.Insert;
 import androidx.room.Query;
 
@@ -15,16 +17,19 @@ public interface MovieDAO {
     @Query("DELETE FROM movie_table WHERE title = :title")
     void deleteByTitle(String title);
 
+    @Delete
+    void deleteItem(Movie movie);
+
     @Query("DELETE FROM movie_table")
     void nuke();
 
     @Query("SELECT * FROM movie_table")
-    List<Movie> getAll();
-
-    @Query("SELECT title FROM movie_table")
-    List<String> getAllTitles();
+    LiveData<List<Movie>> getAllTitles();
 
     @Query("SELECT * FROM movie_table WHERE title = :title")
     Movie findByTitle(String title);
+
+    @Query("UPDATE movie_table SET isWatched = :state WHERE title = :title")
+    void setWatched(boolean state, String title);
 
 }

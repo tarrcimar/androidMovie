@@ -1,88 +1,116 @@
 package com.example.movielist;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
+import android.util.Log;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+import com.example.movielist.database.Movie;
+import com.example.movielist.database.MovieDatabase;
 import com.example.movielist.databinding.ActivityMainBinding;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AnotherMainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    String[] items = new String[]{"1", "2", "3", "4"};
-    //List<String> items;
-
+    private MovieDatabase movieDatabase;
+    private String title;
+    private int releaseDate;
+    private String description;
+    private String imagePath;
 
     @Override
     protected void onResume() {
         super.onResume();
-        new Thread(()-> {
-            MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    MovieDatabase.class, "movie-db").allowMainThreadQueries().build();
 
-            runOnUiThread(() ->{
-                items = new String[db.movieDAO().getAllTitles().size()];
-                db.movieDAO().getAllTitles().toArray(items);
-                binding.moviesListView.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, items));
-                binding.moviesListView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
-
-                    @Override
-                    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                        Toast.makeText(AnotherMainActivity.this, items[i], Toast.LENGTH_SHORT).show();
-                        MovieDetailsActivity movieDetailsActivity = new MovieDetailsActivity();
-                        movieDetailsActivity.setTitle(items[i]);
-                        Intent intent = new Intent(AnotherMainActivity.this, MovieDetailsActivity.class);
-                        intent.putExtra("title", items[i]);
-                        startActivityForResult(intent, 1);
-                        overridePendingTransition(android.R.anim.slide_in_left, android.R.anim.slide_out_right);
-                    }
-                });
-            });
-        }).start();
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getSupportActionBar().hide();
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        binding.moviesRecyclerView.setLayoutManager(new LinearLayoutManager(AnotherMainActivity.this));
+
         //setUpDatabase
+        movieDatabase = Room.databaseBuilder(
+                this,
+                MovieDatabase.class,
+                "movie-db")
+                .fallbackToDestructiveMigration()
+                .build();
 
+        movieDatabase.movieDAO().getAllTitles().observe(this,
+                movieItems -> binding.moviesRecyclerView.setAdapter(new ViewAdapter(movieItems)));
 
-        binding.floatingActionButton2.setOnClickListener(new View.OnClickListener() {
+        binding.floatingActionButton2.setOnClickListener(view -> addItem());
+        binding.nuke.setOnClickListener(
+                view -> new Thread(() -> movieDatabase.movieDAO().nuke()).start());
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.DOWN|ItemTouchHelper.UP, ItemTouchHelper.RIGHT) {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(AnotherMainActivity.this, PopActivity.class);
-                //startActivity(new Intent(MainActivity.this, PopActivity.class));
-                startActivityForResult(intent, 1);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                recyclerView.getAdapter().notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                recyclerView.getAdapter().notifyDataSetChanged();
+                return true;
             }
-        });
 
-        binding.nuke.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                new Thread(()-> {
-                    MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
-                            MovieDatabase.class, "movie-db").allowMainThreadQueries().build();
-                    db.movieDAO().nuke();
-                    Intent refresh = new Intent(AnotherMainActivity.this, AnotherMainActivity.class);
-                    startActivity(refresh);
-                    overridePendingTransition(android.R.anim.accelerate_interpolator, android.R.anim.decelerate_interpolator);
-                    AnotherMainActivity.this.finish();
-                }).start();
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                final Movie myMovie =
+                        ((ViewAdapter)binding.moviesRecyclerView.getAdapter()).getItemAtPosition(position);
+                new Thread(() -> movieDatabase.movieDAO().deleteItem(myMovie)).start();
+                binding.moviesRecyclerView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+                Toast.makeText(AnotherMainActivity.this, "Deleted " + myMovie.getTitle(), Toast.LENGTH_LONG).show();
             }
-        });
+        }).attachToRecyclerView(binding.moviesRecyclerView);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.DOWN|ItemTouchHelper.UP, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                recyclerView.getAdapter().notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                recyclerView.getAdapter().notifyDataSetChanged();
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                final Movie myMovie =
+                        ((ViewAdapter)binding.moviesRecyclerView.getAdapter()).getItemAtPosition(position);
+                //new Thread(() -> movieDatabase.movieDAO().deleteItem(myMovie)).start();
+                Intent intent = new Intent(AnotherMainActivity.this, MovieDetailsActivity.class);
+                intent.putExtra("title", myMovie.getTitle());
+                startActivity(intent);
+                binding.moviesRecyclerView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+                Toast.makeText(AnotherMainActivity.this, myMovie.getTitle() + " opened.", Toast.LENGTH_LONG).show();
+            }
+        }).attachToRecyclerView(binding.moviesRecyclerView);
+
+
     }
 
     @Override
@@ -93,5 +121,51 @@ public class AnotherMainActivity extends AppCompatActivity {
             startActivity(refresh);
             this.finish();
         }
+    }
+
+    private void addItem() {
+        String url = String.format("https://api.themoviedb.org/3/search/movie?api_key=a1b83de092b31b002b1878923d9f143f&query=%1$s",
+                binding.searchMovieEditText.getText());
+        List<String> jsonResponses = new ArrayList<>();
+
+        RequestQueue requestQueue = Volley.newRequestQueue(AnotherMainActivity.this);
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                try {
+                    JSONArray jsonArray = response.getJSONArray("results");
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        if (jsonObject.getString("original_title").equals(binding.searchMovieEditText.getText().toString())) {
+                            Log.d("RESPONSE", "onResponse: " + jsonArray);
+                            title = jsonObject.getString("original_title");
+                            releaseDate = Integer.parseInt(jsonObject.getString("release_date").split("-")[0]);
+                            description = jsonObject.getString("overview");
+                            imagePath = jsonObject.getString("poster_path");
+
+                            new Thread(() -> {
+                                Movie movie = new Movie();
+                                movie.setTitle(title);
+                                movie.setDescription(description);
+                                movie.setImage_path(imagePath);
+                                movie.setReleaseDate(releaseDate);
+                                movie.setWatched(false);
+                                Log.d("MOVIE", "onResponse: " + movie.toString());
+                                movieDatabase.movieDAO().insertMovie(movie);
+                            }).start();
+                            binding.searchMovieEditText.setText(null);
+                            Toast.makeText(AnotherMainActivity.this, title + " added.", Toast.LENGTH_SHORT);
+                            break;
+                        }
+                    }
+                    JSONObject jsonObject = jsonArray.getJSONObject(0);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "Movie not found", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }, error -> error.printStackTrace());
+
+        requestQueue.add(jsonObjectRequest);
     }
 }

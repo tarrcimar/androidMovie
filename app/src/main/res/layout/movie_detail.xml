@@ -5,34 +5,47 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginStart="6dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="6dp"
-        android:layout_marginBottom="6dp"
-        android:contentDescription="@string/todo"
-        app:layout_constraintBottom_toTopOf="@+id/titleTextView"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/cardView2"
+        android:layout_width="213dp"
+        android:layout_height="228dp"
+        android:layout_marginStart="36dp"
+        android:layout_marginTop="53dp"
+        android:layout_marginEnd="36dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@tools:sample/avatars" />
+        app:cardCornerRadius="10dp"
+        android:elevation="10dp">
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="6dp"
+            android:contentDescription="@string/todo"
+            android:elevation="10dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_nuclear_bomb_bw"
+            android:layout_gravity="center"/>
+    </androidx.cardview.widget.CardView>
 
     <TextView
         android:id="@+id/titleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginTop="250dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
         android:text="@string/titleTextView"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/cardView2" />
 
     <TextView
         android:id="@+id/dateTextView"
@@ -64,20 +77,5 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/dateTextView" />
-
-    <ImageView
-        android:id="@+id/delete"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginTop="61dp"
-        android:layout_marginBottom="30dp"
-        android:contentDescription="TODO"
-        app:layout_constraintBottom_toTopOf="@+id/descriptionTextView"
-        app:layout_constraintEnd_toStartOf="@+id/dateTextView"
-        app:layout_constraintHorizontal_bias="0.392"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
-        app:layout_constraintVertical_bias="0.447"
-        app:srcCompat="@drawable/ic_baseline_delete_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

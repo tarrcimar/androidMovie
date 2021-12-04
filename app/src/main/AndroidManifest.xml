@@ -14,7 +14,8 @@
         android:theme="@style/Theme.MovieList">
         <activity
             android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
