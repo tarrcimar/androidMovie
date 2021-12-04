@@ -7,13 +7,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
 import com.bumptech.glide.Glide;
+import com.example.movielist.database.Movie;
+import com.example.movielist.database.MovieDatabase;
 import com.example.movielist.databinding.ItemLayoutBinding;
 
 import java.util.List;
@@ -57,6 +59,10 @@ public class ViewAdapter extends RecyclerView.Adapter<ViewAdapter.ViewHolder> {
         return data.size();
     }
 
+    public Movie getItemAtPosition (int position) {
+        return data.get(position);
+    }
+
     public class ViewHolder extends RecyclerView.ViewHolder {
 
         private MovieDatabase movieDatabase;
@@ -76,30 +82,21 @@ public class ViewAdapter extends RecyclerView.Adapter<ViewAdapter.ViewHolder> {
             binding.getRoot().setOnClickListener(view -> {
                 int mPosition = getLayoutPosition();
 
-                Movie element = ViewAdapter.this.data.get(mPosition);
-                notifyDataSetChanged();
-                Intent intent = new Intent(itemView.getContext(), MovieDetailsActivity.class);
-                intent.putExtra("title", element.getTitle());
-                itemView.getContext().startActivity(intent);
-
-                binding.tagTitleWatched.setOnClickListener(sview -> {
-                    Log.d("Onclick", "onBindViewHolder: " + data.get(mPosition).isWatched());
-                    if(!data.get(mPosition).isWatched()){
-                        data.get(mPosition).setWatched(true);
-                        binding.cardView.setCardBackgroundColor(Color.parseColor("#8FF1C0"));
-                        new Thread(()->{
-                            movieDatabase.movieDAO().setWatched(true, data.get(mPosition).getTitle());
-                        }).start();
-                    }
-                    else{
-                        data.get(mPosition).setWatched(false);
-                        binding.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
-                        new Thread(()->{
-                            movieDatabase.movieDAO().setWatched(false, data.get(mPosition).getTitle());
-                        }).start();
-                    }
-                });
-
+                Log.d("Onclick", "onBindViewHolder: " + data.get(mPosition).isWatched());
+                if(!data.get(mPosition).isWatched()){
+                    data.get(mPosition).setWatched(true);
+                    binding.cardView.setCardBackgroundColor(Color.parseColor("#8FF1C0"));
+                    new Thread(()->{
+                        movieDatabase.movieDAO().setWatched(true, data.get(mPosition).getTitle());
+                    }).start();
+                }
+                else{
+                    data.get(mPosition).setWatched(false);
+                    binding.cardView.setCardBackgroundColor(Color.parseColor("#FFFFFF"));
+                    new Thread(()->{
+                        movieDatabase.movieDAO().setWatched(false, data.get(mPosition).getTitle());
+                    }).start();
+                }
                 ViewAdapter.this.notifyDataSetChanged();
             });
         }

@@ -1,17 +1,16 @@
 package com.example.movielist;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.room.Room;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Toast;
 
 import com.android.volley.Request;
@@ -19,7 +18,8 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
-import com.bumptech.glide.request.transition.Transition;
+import com.example.movielist.database.Movie;
+import com.example.movielist.database.MovieDatabase;
 import com.example.movielist.databinding.ActivityMainBinding;
 
 import org.json.JSONArray;
@@ -69,6 +69,47 @@ public class AnotherMainActivity extends AppCompatActivity {
         binding.nuke.setOnClickListener(
                 view -> new Thread(() -> movieDatabase.movieDAO().nuke()).start());
 
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.DOWN|ItemTouchHelper.UP, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                recyclerView.getAdapter().notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                recyclerView.getAdapter().notifyDataSetChanged();
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                final Movie myMovie =
+                        ((ViewAdapter)binding.moviesRecyclerView.getAdapter()).getItemAtPosition(position);
+                new Thread(() -> movieDatabase.movieDAO().deleteItem(myMovie)).start();
+                binding.moviesRecyclerView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+                Toast.makeText(AnotherMainActivity.this, "Deleted " + myMovie.getTitle(), Toast.LENGTH_LONG).show();
+            }
+        }).attachToRecyclerView(binding.moviesRecyclerView);
+
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.DOWN|ItemTouchHelper.UP, ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                recyclerView.getAdapter().notifyItemMoved(viewHolder.getAdapterPosition(), target.getAdapterPosition());
+                recyclerView.getAdapter().notifyDataSetChanged();
+                return true;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                final Movie myMovie =
+                        ((ViewAdapter)binding.moviesRecyclerView.getAdapter()).getItemAtPosition(position);
+                //new Thread(() -> movieDatabase.movieDAO().deleteItem(myMovie)).start();
+                Intent intent = new Intent(AnotherMainActivity.this, MovieDetailsActivity.class);
+                intent.putExtra("title", myMovie.getTitle());
+                startActivity(intent);
+                binding.moviesRecyclerView.getAdapter().notifyItemChanged(viewHolder.getAdapterPosition());
+                Toast.makeText(AnotherMainActivity.this, myMovie.getTitle() + " opened.", Toast.LENGTH_LONG).show();
+            }
+        }).attachToRecyclerView(binding.moviesRecyclerView);
+
 
     }
 
@@ -112,6 +153,8 @@ public class AnotherMainActivity extends AppCompatActivity {
                                 Log.d("MOVIE", "onResponse: " + movie.toString());
                                 movieDatabase.movieDAO().insertMovie(movie);
                             }).start();
+                            binding.searchMovieEditText.setText(null);
+                            Toast.makeText(AnotherMainActivity.this, title + " added.", Toast.LENGTH_SHORT);
                             break;
                         }
                     }

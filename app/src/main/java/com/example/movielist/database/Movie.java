@@ -1,4 +1,4 @@
-package com.example.movielist;
+package com.example.movielist.database;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;

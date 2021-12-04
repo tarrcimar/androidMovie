@@ -1,26 +1,19 @@
 package com.example.movielist;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.room.Room;
 
 import com.bumptech.glide.Glide;
-
-import org.w3c.dom.Text;
+import com.example.movielist.database.Movie;
+import com.example.movielist.database.MovieDatabase;
 
 public class MovieDetailsActivity extends AppCompatActivity {
 
@@ -40,7 +33,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
     private TextView titleTextView;
     private TextView dateTextView;
     private TextView descriptionTextView;
-    private ImageView delete;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +44,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
         if(extras!=null) setTitle(extras.getString("title"));
 
         imageView = findViewById(R.id.imageView);
+        imageView.setClipToOutline(true);
         titleTextView = findViewById(R.id.titleTextView);
         dateTextView = findViewById(R.id.dateTextView);
         descriptionTextView = findViewById(R.id.descriptionTextView);
-        delete = findViewById(R.id.delete);
 
         new Thread(()-> {
             MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
@@ -79,17 +71,6 @@ public class MovieDetailsActivity extends AppCompatActivity {
             startActivity(intent);
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
         });
-
-        delete.setOnClickListener(view -> new Thread(()-> {
-            MovieDatabase db = Room.databaseBuilder(getApplicationContext(),
-                    MovieDatabase.class, "movie-db").allowMainThreadQueries().build();
-
-            Intent refresh = new Intent(MovieDetailsActivity.this, AnotherMainActivity.class);
-            startActivity(refresh);
-            overridePendingTransition(android.R.anim.accelerate_interpolator, android.R.anim.decelerate_interpolator);
-            MovieDetailsActivity.this.finish();
-            db.movieDAO().deleteByTitle(title);
-        }).start());
 
     }
 }
