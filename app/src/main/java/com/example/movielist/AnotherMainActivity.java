@@ -124,7 +124,8 @@ public class AnotherMainActivity extends AppCompatActivity {
     }
 
     private void addItem() {
-        String url = String.format("https://api.themoviedb.org/3/search/movie?api_key=a1b83de092b31b002b1878923d9f143f&query=%1$s",
+        String url = String.format("https://api.themoviedb.org/3/search/movie?api_key=%1$s&query=%2$s",
+                getString(R.string.tmd_api_key),
                 binding.searchMovieEditText.getText());
         List<String> jsonResponses = new ArrayList<>();
 
